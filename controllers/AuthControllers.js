@@ -7,7 +7,7 @@ import {
 }
   from "../errors/index.js";
 
-  import attachCookies from "../utils/attachCookie.js";
+import attachCookies from "../utils/attachCookie.js";
 
 const register = async (req, res) => {
   const { name, email, password } = req.body;
@@ -19,7 +19,7 @@ const register = async (req, res) => {
   if (userAlreadyExists) {
     throw new BadRequestError("Email already in use")
   }
-  
+
   const user = await User.create({ name, email, password });
 
   const token = user.createJWT();
@@ -42,23 +42,23 @@ const login = async (req, res) => {
     throw new BadRequestError("Please provide all values")
   }
 
-  const user=await User.findOne({email}).select("+password");
-  if(!user){
+  const user = await User.findOne({ email }).select("+password");
+  if (!user) {
     throw new Unauthenticated('Invalid Credentials');
   }
 
   const isPasswordCorrect = await user.comparePassword(password);
 
-  if(!isPasswordCorrect){
+  if (!isPasswordCorrect) {
     throw new Unauthenticated('Invalid Credentials');
   }
 
   const token = user.createJWT();
   user.password = undefined;
-  attachCookies({res, token});
+  attachCookies({ res, token });
 
   res.status(StatusCodes.OK).json({
-   user: {
+    user: {
       email: user.email,
       lastName: user.lastName,
       location: user.location,
@@ -80,14 +80,14 @@ const updateUser = async (req, res) => {
   user.name = name;
   user.lastName = lastName;
   user.location = location;
-  
+
   await user.save();
   const token = user.createJWT();
-  attachCookie({ res, token });
-  
+  attachCookies({ res, token });
+
   res.status(StatusCodes.OK).json({
     user,
-   location: user.location
+    location: user.location
   });
 };
 
@@ -105,4 +105,4 @@ const logoutUser = async (req, res) => {
 }
 
 
-export { register, login, updateUser, getCurrentUser,logoutUser };
+export { register, login, updateUser, getCurrentUser, logoutUser };
